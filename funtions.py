@@ -119,18 +119,6 @@ def get_descriptive_content(dic):
             return dic
 
 
-def validate_db():
-    api_data_num = get_apidata_num()
-
-    db_data_num = get_dbdata_num()
-
-    print(f'date =  => api_num : {api_data_num}, db_num : {db_data_num}')
-    if api_data_num == db_data_num:
-        return True
-    else:
-        return False
-
-
 def update(
         key_path,
         start_date,
@@ -170,6 +158,19 @@ def update(
     data = add_descriptive_content(get_items(api_url, params))
     insert_data(data, collection_name, firestore_key)
 
+    api_data_num = get_apidata_num(api_url, api_key, start_date, end_date)
 
+    db_data_num = get_dbdata_num(collection_name, firestore_key)
+
+    print(f'collection name : {collection_name}')
+    print(f'Date : {start_date} ~ {end_date}')
+    print(f'api_num : {api_data_num}\ndb_num : {db_data_num}')
+
+    if api_data_num == db_data_num:
+        print('Success')
+        return True
+    else:
+        print('Failure')
+        return False
 
 
