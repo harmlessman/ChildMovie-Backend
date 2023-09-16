@@ -65,7 +65,7 @@ def get_dbdata_num(collection_name, firestore_key):
     return len(document)
 
 
-def add_descriptive_content (dicts, multiprocess: bool = False):
+def add_descriptive_content(dicts, multiprocess: bool = False):
     results = []
 
     if multiprocess:
@@ -94,6 +94,10 @@ def insert_data(dicts, collection_name, firestore_key):
 
 
 def get_descriptive_content(dic):
+    if dic['gradeName'] == '청소년관람불가' and dic['coreHarmRsn'] == '선정성':
+        dic['descriptive_content'] = '성인영상물의 서술적 내용정보는 제공하지 않습니다.'
+        return dic
+
     global driver
 
     driver.find_element(By.NAME, 'rt_no').clear()
