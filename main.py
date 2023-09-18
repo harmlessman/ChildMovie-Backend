@@ -1,4 +1,6 @@
 from funtions import update
+from zoneinfo import ZoneInfo
+from datetime import datetime as dt, timedelta
 
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
@@ -28,10 +30,13 @@ driver.get(url)
 # driver.get(url)
 
 if __name__ == '__main__':
+    # 7일전 데이터를 가져옴 (ors 데이터 업로드 딜레이를 감안)
+    date = (dt.now(tz=ZoneInfo("Asia/Seoul")) - timedelta(days=7)).strftime('%Y%m%d')
+
     update(
         key_path='keys.json',
-        start_date='20230906',
-        end_date='20230906',
-        collection_name='test0906',
+        start_date=date,
+        end_date=date,
+        collection_name=date,
         my_driver=driver,
     )
