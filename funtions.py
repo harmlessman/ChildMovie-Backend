@@ -61,7 +61,6 @@ def get_dbdata_num(collection_name, firestore_key):
         firebase_admin.initialize_app(cred)
     db = firestore.client()
     documents_num = db.collection(collection_name).count().get()
-    db.close()
 
     return documents_num[0][0].value
 
@@ -88,8 +87,6 @@ def insert_data(dicts, collection_name, firestore_key):
     for dic in dicts:
         document = db.collection(collection_name).document()
         document.set(dic)
-
-    db.close()
 
     return 1
 
