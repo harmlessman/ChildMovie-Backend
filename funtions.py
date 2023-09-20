@@ -60,9 +60,10 @@ def get_dbdata_num(collection_name, firestore_key):
         cred = credentials.Certificate(firestore_key)
         firebase_admin.initialize_app(cred)
     db = firestore.client()
-    document = db.collection(collection_name).get()
+    documents_num = db.collection(collection_name).count().get()
     db.close()
-    return len(document)
+
+    return documents_num[0][0].value
 
 
 def add_descriptive_content(dicts, multiprocess: bool = False):
