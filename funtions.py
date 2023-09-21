@@ -176,3 +176,21 @@ def update(
         return False
 
 
+def combine_collection(firestore_key, target_collection_id: str = 'movie_db'):
+    if not is_app_initialized():
+        cred = credentials.Certificate(firestore_key)
+        firebase_admin.initialize_app(cred)
+    db = firestore.client()
+    collection_list = db.collections()
+
+    for collection in collection_list:
+        collection_id = collection.id
+        if collection_id == target_collection_id or not collection_id.isdigit():
+            continue
+
+        documents = collection.get()
+        for document in documents:
+            db.collection(target_collection_id).document().set(document.to_dict())
+
+
+
