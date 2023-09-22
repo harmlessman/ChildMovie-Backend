@@ -55,12 +55,12 @@ def is_app_initialized():
         return False
 
 
-def get_dbdata_num(collection_name, firestore_key):
+def get_dbdata_num(collection_id, firestore_key):
     if not is_app_initialized():
         cred = credentials.Certificate(firestore_key)
         firebase_admin.initialize_app(cred)
     db = firestore.client()
-    documents_num = db.collection(collection_name).count().get()
+    documents_num = db.collection(collection_id).count().get()
 
     return documents_num[0][0].value
 
@@ -79,13 +79,13 @@ def add_descriptive_content(dicts, multiprocess: bool = False):
     return results
 
 
-def insert_data(dicts, collection_name, firestore_key):
+def insert_data(dicts, collection_id, firestore_key):
     cred = credentials.Certificate(firestore_key)
     firebase_admin.initialize_app(cred)
     db = firestore.client()
 
     for dic in dicts:
-        document = db.collection(collection_name).document()
+        document = db.collection(collection_id).document()
         document.set(dic)
 
     return 1
@@ -125,7 +125,7 @@ def update(
         key_path,
         start_date,
         end_date,
-        collection_name,
+        collection_id,
         my_driver
 ):
     """
@@ -135,7 +135,7 @@ def update(
         key_path (str): ~
         start_date (str): ~
         end_date (str): ~
-        collection_name (str): ~
+        collection_id (str): ~
         my_driver (WebDriver): ~
 
     Return:
@@ -158,13 +158,13 @@ def update(
     }
 
     data = add_descriptive_content(get_items(api_url, params))
-    insert_data(data, collection_name, firestore_key)
+    insert_data(data, collection_id, firestore_key)
 
     api_data_num = get_apidata_num(api_url, api_key, start_date, end_date)
 
-    db_data_num = get_dbdata_num(collection_name, firestore_key)
+    db_data_num = get_dbdata_num(collection_id, firestore_key)
 
-    print(f'collection name : {collection_name}')
+    print(f'collection name : {collection_id}')
     print(f'Date : {start_date} ~ {end_date}')
     print(f'api_num : {api_data_num}\ndb_num : {db_data_num}')
 

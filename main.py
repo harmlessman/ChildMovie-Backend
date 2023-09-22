@@ -37,6 +37,6 @@ if __name__ == '__main__':
         key_path='keys.json',
         start_date=date,
         end_date=date,
-        collection_name=date,
+        collection_id=date,
         my_driver=driver,
     )
