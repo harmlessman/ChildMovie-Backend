@@ -199,4 +199,19 @@ def combine_collection(firestore_key, target_collection_id: str = 'movie_db'):
     return doc_count
 
 
+def remove_adult_movie(firestore_key, collection_id):
+    if not is_app_initialized():
+        cred = credentials.Certificate(firestore_key)
+        firebase_admin.initialize_app(cred)
 
+    deleted_count = 0
+
+    db = firestore.client()
+    documents = db.collection(collection_id).list_documents()
+    for document in documents:
+        dic = document.get().to_dict()
+        if dic['gradeName'] == '청소년관람불가' and dic['coreHarmRsn'] == '선정성':
+            document.delete()
+            deleted_count += 1
+
+    return deleted_count
