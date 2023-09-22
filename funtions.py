@@ -180,6 +180,9 @@ def combine_collection(firestore_key, target_collection_id: str = 'movie_db'):
     if not is_app_initialized():
         cred = credentials.Certificate(firestore_key)
         firebase_admin.initialize_app(cred)
+
+    doc_count = 0
+
     db = firestore.client()
     collection_list = db.collections()
 
@@ -191,6 +194,9 @@ def combine_collection(firestore_key, target_collection_id: str = 'movie_db'):
         documents = collection.get()
         for document in documents:
             db.collection(target_collection_id).document().set(document.to_dict())
+            doc_count += 1
+
+    return doc_count
 
 
 
