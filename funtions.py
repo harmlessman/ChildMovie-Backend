@@ -1,6 +1,8 @@
 import requests
 import json
 import multiprocessing
+import sqlite3
+from pathlib import Path
 
 import xml.etree.ElementTree as ET
 import firebase_admin
@@ -215,3 +217,105 @@ def remove_adult_movie(firestore_key, collection_id):
             deleted_count += 1
 
     return deleted_count
+
+
+def create_db_file(firestore_key, file_path: str = 'db.db', collection_id: str = 'movie_db'):
+    if Path(file_path).exists():
+        print('이미 같은 이름의 .db파일이 존재합니다!')
+        return
+
+    movie_list = []
+    default_dic = {
+        'aplcName': None,
+        'coreHarmRsn': None,
+        'descriptive_content': None,
+        'direName': None,
+        'direNatnlName': None,
+        'gradeName': None,
+        'leadaName': None,
+        'mvAssoName': None,
+        'oriTitle': None,
+        'prodYear': None,
+        'prodcName': None,
+        'prodcNatnlName': None,
+        'rtCoreHarmRsnNm': None,
+        'rtDate': None,
+        'rtNo': None,
+        'rtStdName1': None,
+        'rtStdName2': None,
+        'rtStdName3': None,
+        'rtStdName4': None,
+        'rtStdName5': None,
+        'rtStdName6': None,
+        'rtStdName7': None,
+        'screTime': None,
+        'stadCont': None,
+        'suppaName': None,
+        'useTitle': None,
+        'workCont': None,
+    }
+    table_name = "movies"
+
+    create_table_query =f"""
+      CREATE TABLE IF NOT EXISTS {table_name} (
+      id INTEGER PRIMARY KEY,
+      aplcName TEXT,
+      coreHarmRsn TEXT,
+      descriptive_content TEXT,
+      direName TEXT,
+      direNatnlName TEXT,
+      gradeName TEXT,
+      leadaName TEXT,
+      mvAssoName TEXT,
+      oriTitle TEXT,
+      prodYear TEXT,
+      prodcName TEXT,
+      prodcNatnlName TEXT,
+      rtCoreHarmRsnNm TEXT,
+      rtDate TEXT,
+      rtNo TEXT,
+      rtStdName1 TEXT,
+      rtStdName2 TEXT,
+      rtStdName3 TEXT,
+      rtStdName4 TEXT,
+      rtStdName5 TEXT,
+      rtStdName6 TEXT,
+      rtStdName7 TEXT,
+      screTime TEXT,
+      stadCont TEXT,
+      suppaName TEXT,
+      useTitle TEXT,
+      workCont TEXT
+      )
+    """
+
+    columns = ', '.join(default_dic.keys())
+    placeholders = ':' + ', :'.join(default_dic.keys())
+    insert_query = f'INSERT INTO {table_name} ({columns}) VALUES ({placeholders})'
+
+    if not is_app_initialized():
+        cred = credentials.Certificate(firestore_key)
+        firebase_admin.initialize_app(cred)
+
+    db = firestore.client()
+    documents = db.collection(collection_id).get()
+
+    for document in documents:
+        movie_list.append({**default_dic, **document.to_dict()})
+
+    con = sqlite3.connect(file_path)
+
+    cur = con.cursor()
+    cur.execute(create_table_query)
+
+    cur.executemany(insert_query, movie_list)
+
+    con.commit()
+    con.close()
+
+    print(f'{file_path}에 저장되었습니다!')
+    return
+
+
+
+
