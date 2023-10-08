@@ -12,6 +12,8 @@ from selenium.webdriver.common.by import By
 
 global driver
 
+count_18 = 0
+
 
 def set_driver(my_driver):
     global driver
@@ -25,12 +27,19 @@ def get_items(api_url, params) -> [dict]:
     items = root.findall('./body/items/item')
 
     dicts = []
+    global count_18
 
     # ET.Element => dict
     for item in items:
         dic = {}
         for child in item:
             dic[child.tag] = child.text
+
+        # 성인영상물일 경우 dicts에 추가하지 않음
+        if (dic.get('gradeName') == '청소년관람불가' or dic.get('gradeName') == '제한상영가') and dic.get('coreHarmRsn') == '선정성':
+            count_18 += 1
+            continue
+
         dicts.append(dic)
 
     return dicts
@@ -94,13 +103,8 @@ def insert_data(dicts, collection_id, firestore_key):
 
 
 def get_descriptive_content(dic):
-    if dic['gradeName'] == '청소년관람불가' and dic['coreHarmRsn'] == '선정성':
-        dic['descriptive_content'] = '성인영상물의 서술적 내용정보는 제공하지 않습니다.'
-        return dic
-
     global driver
 
-    driver.find_element(By.NAME, 'rt_no').clear()
     driver.find_element(By.NAME, 'mv_use_title').clear()
     driver.find_element(By.NAME, 'rt_no').send_keys(dic['rtNo'])
     driver.find_element(By.NAME, 'mv_use_title').send_keys(dic['useTitle'])
@@ -168,9 +172,9 @@ def update(
 
     print(f'collection name : {collection_id}')
     print(f'Date : {start_date} ~ {end_date}')
-    print(f'api_num : {api_data_num}\ndb_num : {db_data_num}')
+    print(f'api_num : {api_data_num}\ndb_num : {db_data_num}\ncount_18 : {count_18}')
 
-    if api_data_num == db_data_num:
+    if api_data_num == db_data_num + count_18:
         print('Success')
         return True
     else:
