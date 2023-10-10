@@ -84,9 +84,9 @@ def add_descriptive_content(dicts, multiprocess: bool = False):
             results = pool.map(get_descriptive_content, dicts)
     else:
         for i in dicts:
-            a = get_descriptive_content(i)
-            results.append(a)
-
+            dic = get_descriptive_content(i)
+            if len(dic) > 0:
+                results.append(dic)
     return results
 
 
@@ -105,6 +105,7 @@ def insert_data(dicts, collection_id, firestore_key):
 def get_descriptive_content(dic):
     global driver
 
+    driver.find_element(By.NAME, 'rt_no').clear()
     driver.find_element(By.NAME, 'mv_use_title').clear()
     driver.find_element(By.NAME, 'rt_no').send_keys(dic['rtNo'])
     driver.find_element(By.NAME, 'mv_use_title').send_keys(dic['useTitle'])
@@ -125,6 +126,13 @@ def get_descriptive_content(dic):
                 dic['descriptive_content'] = text
 
             return dic
+
+    # 만약 다른페이지로 넘어가서 descriptive_content를 가져오지 못했을 경우에는 원래 페이지로 돌아간다.
+    # (성인 영상물인 경우 인증페이지로 넘어감. get_items()의 필터로 못 걸러 냈을 때를 대비하는 코드)
+    global count_18
+    count_18 += 1
+    driver.get('http://ors.kmrb.or.kr/rating/inquiry_mv_list.do')
+    return {}
 
 
 def update(
@@ -216,7 +224,7 @@ def remove_adult_movie(firestore_key, collection_id):
     documents = db.collection(collection_id).list_documents()
     for document in documents:
         dic = document.get().to_dict()
-        if dic['gradeName'] == '청소년관람불가' and dic['coreHarmRsn'] == '선정성':
+        if (dic.get('gradeName') == '청소년관람불가' or dic.get('gradeName') == '제한상영가') and dic.get('coreHarmRsn') == '선정성':
             document.delete()
             deleted_count += 1
 
