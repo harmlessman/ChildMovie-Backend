@@ -210,6 +210,9 @@ def combine_collection(firestore_key, target_collection_id: str = 'movie_db'):
             db.collection(target_collection_id).document().set(document.to_dict())
             doc_count += 1
 
+        # target collection에 옮긴 후, 문서 삭제
+        delete_collection(firestore_key, collection_id)
+
     return doc_count
 
 
@@ -329,5 +332,14 @@ def create_db_file(firestore_key, file_path: str = 'db.db', collection_id: str =
     return
 
 
+def delete_collection(firestore_key, collection_id):
+    if not is_app_initialized():
+        cred = credentials.Certificate(firestore_key)
+        firebase_admin.initialize_app(cred)
 
+    db = firestore.client()
+    documents = db.collection(collection_id).list_documents()
+    for document in documents:
+        document.delete()
 
+    return 1
