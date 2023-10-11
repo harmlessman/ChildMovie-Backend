@@ -14,8 +14,9 @@ chrome_options.add_argument('--no-sandbox')
 chrome_options.add_argument('--disable-dev-shm-usage')
 url = 'http://ors.kmrb.or.kr/rating/inquiry_mv_list.do'
 
-s = Service(executable_path="/usr/src/chrome/chromedriver")
-driver = webdriver.Chrome(service=s, options=chrome_options)
+# s = Service(executable_path="/usr/src/chrome/chromedriver")
+# driver = webdriver.Chrome(service=s, options=chrome_options)
+driver = webdriver.Chrome(options=chrome_options)
 driver.implicitly_wait(10)
 driver.get(url)
 
